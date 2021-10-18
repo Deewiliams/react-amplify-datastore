@@ -9,23 +9,24 @@ const initialState = { color: '#00000', title: ''}
 
 function App() {
   const [formState, updateFormState] = useState(initialState);
-  const [message, updateMessage] = useState([]);
+  const [messages, updateMessage] = useState([]);
   const [showPicker, updateShowerPicker] = useState(false);
 
   useEffect(() => {
     fetchMessages()
     const subscription = DataStore.observe(Message).subscribe(() => fetchMessages())
     return () => subscription.unsubscribe()
-  })
+  },[])
 
   function onChange(e) {
     if(e.hex){
       updateFormState({...formState, color: e.hex})
     }else {updateFormState({...formState, title: e.target.value})}
   }
+
   async function fetchMessages() {
-    const Messages = await DataStore.query(Message)
-    updateMessage(Messages)
+    const messages = await DataStore.query(Message)
+    updateMessage(messages)
   }
 
   async function createMessage() {
@@ -35,7 +36,7 @@ function App() {
   
   return (
     <div style={container} >
-      <h1 style={heading}  >Real Time Message Board</h1>
+      <h1 style={heading}>Real Time Message Board</h1>
       <Input 
       onChange={onChange}
       name='title'
@@ -45,16 +46,17 @@ function App() {
       />
       <div>
         <Button onClick={() => updateShowerPicker(!showPicker)} style={button} >Toggle Color Picker</Button>
-        <p>Color: <span style={{fontWeight: 'bold, color: formState.color'}} >{formState.color} </span> </p>
+        <p>Color: <span style={{fontWeight: 'bold, color: formState.color'}}>{formState.color} </span></p>
       </div>
       {
-        showPicker && <SketchPicker color={formState.color} onChange={onChange} />
+        showPicker && <SketchPicker color={formState.color} onChange={onChange}/>
       }
+      <Button type='primary' onClick={createMessage}>Create Message</Button>
        {
-         message.map(message => (
+         messages.map(message => (
            <div key={message.id} style={{...messageStyle, backgroundColor: message.color}}>
-             <div style={messageBg} >
-               <p style={messageTitle} >{message.title} </p>
+             <div style={messageBg}>
+               <p style={messageTitle} >{message.title}</p>
                 </div>
              </div>
          ))
@@ -72,6 +74,8 @@ const heading = {fontWeight: 'normal', fontSize:40}
 const messageBg = { backgroundColor: 'white'}
 const messageStyle ={ padding: '20px', marginTop: 7, borderRadius: 4}
 const messageTitle = { margin: 0, padding: 9, fontSize: 20}
+
+
 export default App;
 
 
